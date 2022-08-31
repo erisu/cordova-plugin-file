@@ -587,7 +587,7 @@ NSString* const kCDVFilesystemURLPrefix = @"cdvfile";
 -(NSString *)encodePath:(NSString *)path
 {
     NSString *decodedPath = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]; //decode incase it's already encoded to avoid encoding twice
-    return [decodedPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [decodedPath stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
 }
 
 
