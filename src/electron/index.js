@@ -36,6 +36,8 @@ module.exports = {
 
   getFile: async ([dirname, path, flags] = args) => {
     // @todo update implementation to handle proper file read, catch failures, usage of flags.
+    console.log('My Native Code Was Hit');
+
     try {
       return readFileSync(join(dirname, path));
     } catch (e) {
