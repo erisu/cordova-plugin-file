@@ -518,7 +518,18 @@ filesystems to be installed. By default, all file-system roots are enabled.
 
 * `files`: The application's internal file storage directory
 * `files-external`: The application's external file storage directory
-* `sdcard`: The global external file storage directory (this is the root of the SD card, if one is installed). You must have the `android.permission.WRITE_EXTERNAL_STORAGE` permission to use this.
+* `sdcard`: The global external file storage directory (this is the root of the SD card, if one is installed).
+
+  You must have the [`android.permission.WRITE_EXTERNAL_STORAGE`](https://developer.android.com/reference/android/Manifest.permission) permission to use this.
+
+  > If this permission is not allowlisted for an app that targets an API level before [`Build.VERSION_CODES.Q`](https://developer.android.com/reference/android/os/Build.VERSION_CODES#Q) (SDK 29) this permission cannot be granted to apps.
+
+  ```xml
+  <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+  </config-file>
+  ```
+
 * `cache`: The application's internal cache directory
 * `cache-external`: The application's external cache directory
 * `assets`: The application's bundle (read-only)
