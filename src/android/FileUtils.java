@@ -362,7 +362,7 @@ public class FileUtils extends CordovaPlugin {
             }, rawArgs, callbackContext);
         } else if (action.equals("write")) {
             threadhelper(new FileOp() {
-                public void run(JSONArray args) throws JSONException, FileNotFoundException, IOException, NoModificationAllowedException {
+                public void run(JSONArray args) throws JSONException, IOException, NoModificationAllowedException {
                     String fname = args.getString(0);
                     String nativeURL = resolveLocalFileSystemURI(fname).getString("nativeURL");
                     String data = args.getString(1);
@@ -380,7 +380,7 @@ public class FileUtils extends CordovaPlugin {
             }, rawArgs, callbackContext);
         } else if (action.equals("truncate")) {
             threadhelper(new FileOp() {
-                public void run(JSONArray args) throws JSONException, FileNotFoundException, IOException, NoModificationAllowedException {
+                public void run(JSONArray args) throws JSONException, IOException, NoModificationAllowedException {
                     String fname = args.getString(0);
                     int offset = args.getInt(1);
                     long fileSize = truncateFile(fname, offset);
@@ -389,7 +389,7 @@ public class FileUtils extends CordovaPlugin {
             }, rawArgs, callbackContext);
         } else if (action.equals("requestAllFileSystems")) {
             threadhelper(new FileOp() {
-                public void run(JSONArray args) throws IOException, JSONException {
+                public void run(JSONArray args) {
                     callbackContext.success(requestAllFileSystems());
                 }
             }, rawArgs, callbackContext);
@@ -526,7 +526,7 @@ public class FileUtils extends CordovaPlugin {
             }, rawArgs, callbackContext);
         } else if (action.equals("readEntries")) {
             threadhelper(new FileOp() {
-                public void run(JSONArray args) throws FileNotFoundException, JSONException, MalformedURLException, IOException {
+                public void run(JSONArray args) throws JSONException, IOException {
                     String directory = args.getString(0);
                     String nativeURL = resolveLocalFileSystemURI(directory).getString("nativeURL");
                     if (needPermission(nativeURL, READ)) {
@@ -541,7 +541,7 @@ public class FileUtils extends CordovaPlugin {
             // Internal method for testing: Get the on-disk location of a local filesystem url.
             // [Currently used for testing file-transfer]
             threadhelper(new FileOp() {
-                public void run(JSONArray args) throws FileNotFoundException, JSONException, MalformedURLException {
+                public void run(JSONArray args) throws JSONException, MalformedURLException {
                     String localURLstr = args.getString(0);
                     String fname = filesystemPathForURL(localURLstr);
                     callbackContext.success(fname);
@@ -714,9 +714,8 @@ public class FileUtils extends CordovaPlugin {
      * @throws MalformedURLException if the url is not valid
      * @throws FileNotFoundException if the file does not exist
      * @throws IOException           if the user can't read the file
-     * @throws JSONException
      */
-    private JSONObject resolveLocalFileSystemURI(String uriString) throws IOException, JSONException {
+    private JSONObject resolveLocalFileSystemURI(String uriString) throws IOException, FileNotFoundException, MalformedURLException {
         if (uriString == null) {
             throw new MalformedURLException("Unrecognized filesystem URL");
         }
@@ -757,10 +756,9 @@ public class FileUtils extends CordovaPlugin {
      *
      * @return a JSONArray containing JSONObjects that represent Entry objects.
      * @throws FileNotFoundException if the directory is not found.
-     * @throws JSONException
      * @throws MalformedURLException
      */
-    private JSONArray readEntries(String baseURLstr) throws FileNotFoundException, JSONException, MalformedURLException {
+    private JSONArray readEntries(String baseURLstr) throws FileNotFoundException, MalformedURLException {
         try {
             LocalFilesystemURL inputURL = LocalFilesystemURL.parse(baseURLstr);
             Filesystem fs = this.filesystemForURL(inputURL);
@@ -909,7 +907,7 @@ public class FileUtils extends CordovaPlugin {
      * Look up the parent DirectoryEntry containing this Entry.
      * If this Entry is the root of its filesystem, its parent is itself.
      */
-    private JSONObject getParent(String baseURLstr) throws JSONException, IOException {
+    private JSONObject getParent(String baseURLstr) throws IOException {
         try {
             LocalFilesystemURL inputURL = LocalFilesystemURL.parse(baseURLstr);
             Filesystem fs = this.filesystemForURL(inputURL);
@@ -930,7 +928,7 @@ public class FileUtils extends CordovaPlugin {
      *
      * @return returns a JSONObject represent a W3C File object
      */
-    private JSONObject getFileMetadata(String baseURLstr) throws FileNotFoundException, JSONException, MalformedURLException {
+    private JSONObject getFileMetadata(String baseURLstr) throws FileNotFoundException, MalformedURLException {
         try {
             LocalFilesystemURL inputURL = LocalFilesystemURL.parse(baseURLstr);
             Filesystem fs = this.filesystemForURL(inputURL);
@@ -986,7 +984,7 @@ public class FileUtils extends CordovaPlugin {
      *
      * @return a JSONObject representing the file system
      */
-    private JSONArray requestAllFileSystems() throws IOException, JSONException {
+    private JSONArray requestAllFileSystems() {
         JSONArray ret = new JSONArray();
         for (Filesystem fs : filesystems) {
             ret.put(fs.getRootEntry());
@@ -1025,9 +1023,8 @@ public class FileUtils extends CordovaPlugin {
      *
      * @param file the File to convert
      * @return a JSON representation of the given File
-     * @throws JSONException
      */
-    public JSONObject getEntryForFile(File file) throws JSONException {
+    public JSONObject getEntryForFile(File file) {
         JSONObject entry;
 
         for (Filesystem fs : filesystems) {
@@ -1047,10 +1044,9 @@ public class FileUtils extends CordovaPlugin {
      *
      * @param file the File to convert
      * @return a JSON representation of the given File
-     * @throws JSONException
      */
     @Deprecated
-    public static JSONObject getEntry(File file) throws JSONException {
+    public static JSONObject getEntry(File file) {
         if (getFilePlugin() != null) {
             return getFilePlugin().getEntryForFile(file);
         }
@@ -1139,7 +1135,7 @@ public class FileUtils extends CordovaPlugin {
      * @param isBinary True if the file contents are base64-encoded binary data
      */
     /**/
-    public long write(String srcURLstr, String data, int offset, boolean isBinary) throws FileNotFoundException, IOException, NoModificationAllowedException {
+    public long write(String srcURLstr, String data, int offset, boolean isBinary) throws IOException, NoModificationAllowedException {
         try {
             LocalFilesystemURL inputURL = LocalFilesystemURL.parse(srcURLstr);
             Filesystem fs = this.filesystemForURL(inputURL);
@@ -1159,7 +1155,7 @@ public class FileUtils extends CordovaPlugin {
     /**
      * Truncate the file to size
      */
-    private long truncateFile(String srcURLstr, long size) throws FileNotFoundException, IOException, NoModificationAllowedException {
+    private long truncateFile(String srcURLstr, long size) throws IOException, NoModificationAllowedException {
         try {
             LocalFilesystemURL inputURL = LocalFilesystemURL.parse(srcURLstr);
             Filesystem fs = this.filesystemForURL(inputURL);
@@ -1181,7 +1177,7 @@ public class FileUtils extends CordovaPlugin {
      */
 
     public void onRequestPermissionResult(int requestCode, String[] permissions,
-                                          int[] grantResults) throws JSONException {
+                                          int[] grantResults) {
 
         final PendingRequests.Request req = pendingRequests.getAndRemove(requestCode);
         if (req != null) {
@@ -1216,7 +1212,7 @@ public class FileUtils extends CordovaPlugin {
                     break;
                 case ACTION_WRITE:
                     threadhelper(new FileOp() {
-                        public void run(JSONArray args) throws JSONException, FileNotFoundException, IOException, NoModificationAllowedException {
+                        public void run(JSONArray args) throws JSONException, IOException, NoModificationAllowedException {
                             String fname = args.getString(0);
                             String data = args.getString(1);
                             int offset = args.getInt(2);

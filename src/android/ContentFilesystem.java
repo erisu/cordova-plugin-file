@@ -85,7 +85,7 @@ public class ContentFilesystem extends Filesystem {
 
     @Override
     public JSONObject getFileForLocalURL(LocalFilesystemURL inputURL,
-            String fileName, JSONObject options, boolean directory) throws IOException, TypeMismatchException, JSONException {
+            String fileName, JSONObject options, boolean directory) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("getFile() not supported for content:. Use resolveLocalFileSystemURL instead.");
     }
 
@@ -113,7 +113,7 @@ public class ContentFilesystem extends Filesystem {
     }
 
     @Override
-    public LocalFilesystemURL[] listChildren(LocalFilesystemURL inputURL) throws FileNotFoundException {
+    public LocalFilesystemURL[] listChildren(LocalFilesystemURL inputURL) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("readEntriesAtLocalURL() not supported for content:. Use resolveLocalFileSystemURL instead.");
     }
 

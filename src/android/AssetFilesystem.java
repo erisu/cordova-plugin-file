@@ -208,7 +208,7 @@ public class AssetFilesystem extends Filesystem {
     @Override
     public JSONObject getFileForLocalURL(LocalFilesystemURL inputURL,
                                          String path, JSONObject options, boolean directory)
-            throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
+            throws IOException, TypeMismatchException {
         if (options != null && options.optBoolean("create")) {
             throw new UnsupportedOperationException("Assets are read-only");
         }
@@ -261,12 +261,12 @@ public class AssetFilesystem extends Filesystem {
     }
 
     @Override
-    long writeToFileAtURL(LocalFilesystemURL inputURL, String data, int offset, boolean isBinary) throws NoModificationAllowedException, IOException {
+    long writeToFileAtURL(LocalFilesystemURL inputURL, String data, int offset, boolean isBinary) throws NoModificationAllowedException {
         throw new NoModificationAllowedException("Assets are read-only");
     }
 
     @Override
-    long truncateFileAtURL(LocalFilesystemURL inputURL, long size) throws IOException, NoModificationAllowedException {
+    long truncateFileAtURL(LocalFilesystemURL inputURL, long size) throws NoModificationAllowedException {
         throw new NoModificationAllowedException("Assets are read-only");
     }
 
@@ -281,7 +281,7 @@ public class AssetFilesystem extends Filesystem {
     }
 
     @Override
-    boolean removeFileAtLocalURL(LocalFilesystemURL inputURL) throws InvalidModificationException, NoModificationAllowedException {
+    boolean removeFileAtLocalURL(LocalFilesystemURL inputURL) throws NoModificationAllowedException {
         throw new NoModificationAllowedException("Assets are read-only");
     }
 

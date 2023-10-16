@@ -106,7 +106,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject getFileForLocalURL(LocalFilesystemURL inputURL,
-            String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException, JSONException {
+            String path, JSONObject options, boolean directory) throws FileExistsException, IOException, TypeMismatchException, EncodingException {
         boolean create = false;
         boolean exclusive = false;
 
@@ -324,7 +324,7 @@ public class LocalFilesystem extends Filesystem {
 
     @Override
     public JSONObject copyFileToURL(LocalFilesystemURL destURL, String newName,
-            Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, JSONException, NoModificationAllowedException, FileExistsException {
+            Filesystem srcFs, LocalFilesystemURL srcURL, boolean move) throws IOException, InvalidModificationException, NoModificationAllowedException, FileExistsException {
 
         // Check to see if the destination directory exists
         String newParent = this.filesystemPathForURL(destURL);
