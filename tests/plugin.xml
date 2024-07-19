@@ -29,6 +29,13 @@
     <js-module src="tests.js" name="tests">
     </js-module>
 
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <allow-navigation href="cdvfile:*" />
+            <access origin="cdvfile://*" />
+        </config-file>
+    </platform>
+
     <platform name="android">
         <source-file src="src/android/TestContentProvider.java" target-dir="src/org/apache/cordova/file/test" />
         <config-file target="AndroidManifest.xml" parent="/*/application">

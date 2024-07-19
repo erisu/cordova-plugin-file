@@ -3815,7 +3815,7 @@ exports.defineAutoTests = function () {
                 let cdvfileApplicationDirectoryFsRootNameURL;
                 if (cordova.platformId === 'android') {
                     cdvfileApplicationDirectoryFsRootName = 'assets';
-                    cdvfileApplicationDirectoryFsRootNameURL = 'https://localhost/__cdvfile_' + cdvfileApplicationDirectoryFsRootName + '__/';
+                    cdvfileApplicationDirectoryFsRootNameURL = 'http://localhost/__cdvfile_' + cdvfileApplicationDirectoryFsRootName + '__/';
                 } else if (cordova.platformId === 'ios') {
                     cdvfileApplicationDirectoryFsRootName = 'bundle';
                     cdvfileApplicationDirectoryFsRootNameURL = 'cdvfile://localhost/' + cdvfileApplicationDirectoryFsRootName + '/';
