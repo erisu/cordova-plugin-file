@@ -411,108 +411,101 @@ writer.onprogress = function() { /*commands*/ };
 
 ## Upgrading Notes
 
-In v1.0.0 of this plugin, the `FileEntry` and `DirectoryEntry` structures have changed,
-to be more in line with the published specification.
+### Upgrading to v1.0.0
 
-Previous (pre-1.0.0) versions of the plugin stored the device-absolute-file-location
-in the `fullPath` property of `Entry` objects. These paths would typically look like
+In this update, the `FileEntry` and `DirectoryEntry` structures have been revised to align with the official specification.
 
-    /var/mobile/Applications/<application UUID>/Documents/path/to/file  (iOS)
-    /storage/emulated/0/path/to/file                                    (Android)
+**Key Changes:**
 
-These paths were also returned by the `toURL()` method of the `Entry` objects.
+1. `Entry.fullPath` Property
 
-With v1.0.0, the `fullPath` attribute is the path to the file, _relative to the root of
-the HTML filesystem_. So, the above paths would now both be represented by a `FileEntry`
-object with a `fullPath` of
+    Previously (`< v1.0.0`), the `fullPath` contained the device-absolute file path in the `Entry` objects. For example:
 
-    /path/to/file
+    - iOS: `/var/mobile/Applications/<app UUID>/Documents/path/to/file`
+    - Android: `/storage/emulated/0/path/to/file`
 
-If your application works with device-absolute-paths, and you previously retrieved those
-paths through the `fullPath` property of `Entry` objects, then you should update your code
-to use `entry.toURL()` instead.
+    Now, the `fullPath` represents the file path relative to the root of the HTML filesystem, e.g., `/path/to/file` for both iOS and Android.
 
-For backwards compatibility, the `resolveLocalFileSystemURL()` method will accept a
-device-absolute-path, and will return an `Entry` object corresponding to it, as long as that
-file exists within either the `TEMPORARY` or `PERSISTENT` filesystems.
+2. Code Adjustments:
 
-This has particularly been an issue with the File-Transfer plugin, which previously used
-device-absolute-paths (and can still accept them). It has been updated to work correctly
-with FileSystem URLs, so replacing `entry.fullPath` with `entry.toURL()` should resolve any
-issues getting that plugin to work with files on the device.
+   - If your application relies on device-absolute paths (previously accessible via `entry.fullPath`), update your code to use `entry.toURL()` instead.
 
-In v1.1.0 the return value of `toURL()` was changed (see [CB-6394](https://issues.apache.org/jira/browse/CB-6394))
-to return an absolute 'file://' URL. wherever possible. To ensure a 'cdvfile:'-URL you can use `toInternalURL()` now.
-This method will now return filesystem URLs of the form
+3. Backwards Compatibility:
 
-    cdvfile://localhost/persistent/path/to/file
+   - `resolveLocalFileSystemURL()` still supports device-absolute paths and will return an `Entry` object, provided the file is within `TEMPORARY` or `PERSISTENT` storage.
 
-which can be used to identify the file uniquely.
+4. File-Transfer Plugin Compatibility:
 
-In v7.0.0 the return value of `toURL()` for Android was updated to return the absolute `file://` URL when app content is served from the `file://` scheme.
+    This has particularly been an issue with the File-Transfer plugin, which previously used
+    device-absolute-paths (and can still accept them). The File-Transfer plugin has been updated to handle FileSystem URLs. Replacing `entry.fullPath` with `entry.toURL()` should resolve compatibility issues with this plugin.
 
-If app content is served from the `http(s)://` scheme, a `cdvfile` formatted URL will be returned instead. The `cdvfile` formatted URL is created from the internal method `toInternalURL()`.
+### Upgrading to v1.1.0
 
-An example `toInternalURL()` return filesystem URL:
+**Key Changes:**
 
-    https://localhost/persistent/path/to/file
+1. `Entry.toURL()` Method
 
-[![toURL flow](https://sketchviz.com/@erisu/7b05499842275be93a0581e8e3576798/6dc71d8302cafd05b443d874a592d10fa415b8e3.sketchy.png)](//sketchviz.com/@erisu/7b05499842275be93a0581e8e3576798)
+    The `toURL()` method on the `Entry` objects has been changed to return an absolute `file://` URL wherever possible. See ticket [CB-6394](https://issues.apache.org/jira/browse/CB-6394) for more details.
 
-It is recommended to always use the `toURL()` to ensure that the correct URL is returned.
+2. `cdvfile:` URL
 
-## cdvfile protocol
+    The `toInternalURL()` method from the `Entry` objects can be used to return a filesystem URL in the form of a `cdvfile:` URL to identify the file uniquely.
 
-- Not Supported on Android
+    Example URL: `cdvfile://localhost/persistent/path/to/file`
 
-**Purpose**
+### Upgrading to v7.0.0
 
-`cdvfile://localhost/persistent|temporary|another-fs-root*/path/to/file` can be used for platform-independent file paths.
-cdvfile paths are supported by core plugins - for example you can download an mp3 file to cdvfile-path via `cordova-plugin-file-transfer` and play it via `cordova-plugin-media`.
+**Key Updates:**
 
-__*Note__: See [Where to Store Files](#where-to-store-files), [File System Layouts](#file-system-layouts) and [Configuring the Plugin](#configuring-the-plugin-optional) for more details about available fs roots.
+1. **`Entry.toURL()` Method**
 
-To use `cdvfile` as a tag' `src` you can convert it to native path via `toURL()` method of the resolved fileEntry, which you can get via `resolveLocalFileSystemURL` - see examples below.
+    On Android, the `toURL()` method on the `Entry` objects now returns based on where the app content is served from.
 
-You can also use `cdvfile://` paths directly in the DOM, for example:
-```HTML
-<img src="cdvfile://localhost/persistent/img/logo.png" />
-```
+   - When app content is served from `file://` scheme, it returns an absolute `file://` URL.
+   - When app content is served form `http(s)://` scheme, it returns a formatted `cdvfile` URL instead.
 
-__Note__: This method requires following Content Security rules updates:
-* Add `cdvfile:` scheme to `Content-Security-Policy` meta tag of the index page, e.g.:
-  - `<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: `**cdvfile:**` https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">`
-* Add `<access origin="cdvfile://*" />` to `config.xml`.
+    See the `Entry.toInternalURL()` changes below for more details on the updated `cdvfile` URL format.
 
-**Converting cdvfile:// to native path**
+    **Recommendation:** Use `toURL()` to ensure the correct URL format for your app's environment.
 
-```javascript
-resolveLocalFileSystemURL('cdvfile://localhost/temporary/path/to/file.mp4', function(entry) {
-    var nativePath = entry.toURL();
-    console.log('Native URI: ' + nativePath);
-    document.getElementById('video').src = nativePath;
-```
+   [![toURL flow](https://sketchviz.com/@erisu/7b05499842275be93a0581e8e3576798/6dc71d8302cafd05b443d874a592d10fa415b8e3.sketchy.png)](//sketchviz.com/@erisu/7b05499842275be93a0581e8e3576798)
 
-**Converting native path to cdvfile://**
+2. **`Entry.toInternalURL()` Method**
 
-```javascript
-resolveLocalFileSystemURL(nativePath, function(entry) {
-    console.log('cdvfile URI: ' + entry.toInternalURL());
-```
+   The `toInternalURL()` method now formats `cdvfile` URLs with the app's custom scheme.
 
-**Using cdvfile in core plugins**
+   - Previous format:
 
-```javascript
-fileTransfer.download(uri, 'cdvfile://localhost/temporary/path/to/file.mp3', function (entry) { ...
-```
-```javascript
-var my_media = new Media('cdvfile://localhost/temporary/path/to/file.mp3', ...);
-my_media.play();
-```
+        ```
+        cdvfile://localhost/persistent/path/to/file
+        ```
 
-#### cdvfile quirks
-- Using `cdvfile://` paths in the DOM is not supported on Windows platform (a path can be converted to native instead).
+   - New format:
 
+        ```
+        https://localhost/__cdvfile_persistent__/path/to/file
+        ```
+
+   This update resolves issues with the `cdvfile:` scheme when using a custom scheme handler.
+
+   **Note:** The scheme and hostname in the URL is based on the `config.xml` preference settings.
+
+### Upgrading to v8.1.3
+
+1. **`Entry.toURL()` Method**
+
+    On iOS, the `toURL()` method on the `Entry` objects was updated to return a usable URL based on where the app content was being served from, similar to Android.
+
+    - If the Cordova-iOS platform does not support the `window.WKWebView.convertFilePath()` method, it will return the `nativeURL` property of the `Entry` object which should be an absolute `file://` path.
+    - If the Cordova-iOS platform support the `window.WKWebView.convertFilePath()` method, it will return a type of URL based on the following conditions:
+    - When `path` or `CDV_ASSETS_URL` is `null`, `path` is returned.
+    - When `path` starts with `/`, `app://localhost/_app_file_/<path>` is returned.
+    - When `path` starts with `file://`, `app://localhost/_app_file_/<path>` is returned.
+    - Fallbacks to `path`
+
+    **Note:** The `app://` scheme and `localhost` hostname in the returned URL is based on the `config.xml` preference settings.
+
+    [![toURL flow](https://sketchviz.com/@erisu/002ecffae7423f082e0a2447e0084e12/06619a716b39b488a5b38b8cba10ab1a8c26e613.sketchy.png)](//sketchviz.com/@erisu/002ecffae7423f082e0a2447e0084e12)
 
 ## List of Error Codes and Meanings
 When an error is thrown, one of the following codes will be used.
