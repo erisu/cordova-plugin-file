@@ -1,1 +1,4 @@
+\.(.*)
+(.*).txt
+index.d.ts
 asset-test.txt
