@@ -2,3 +2,4 @@
 (.*).txt
 index.d.ts
 asset-test.txt
+node_modules
